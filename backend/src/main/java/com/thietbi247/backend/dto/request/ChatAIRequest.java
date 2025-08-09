@@ -1,4 +1,5 @@
 package com.thietbi247.backend.dto.request;
 
-public class EmployeeUpdateRequest {
+public record ChatAIRequest(String message){
+
 }

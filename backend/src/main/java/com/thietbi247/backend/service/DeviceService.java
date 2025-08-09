@@ -2,6 +2,7 @@ package com.thietbi247.backend.service;
 
 import com.thietbi247.backend.constant.ErrorCode;
 import com.thietbi247.backend.dto.request.DeviceCreatRequest;
+import com.thietbi247.backend.dto.request.DeviceUpdateRequest;
 import com.thietbi247.backend.dto.responsitory.DeviceResponse;
 import com.thietbi247.backend.entity.Device;
 import com.thietbi247.backend.exception.AppException;
@@ -12,6 +13,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +30,14 @@ import java.util.stream.Collectors;
 public class DeviceService {
     DeviceMapper mapper;
     DeviceRepository repository;
-    public DeviceResponse  createDevice(DeviceCreatRequest request) {
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public DeviceResponse createDevice(DeviceCreatRequest request) {
         Device device = mapper.toDevice(request);
-        device.setDatePurchase(LocalDateTime.now());
         repository.save(device);
         return mapper.toDeviceResponse(device);
     }
+
 
     public List<DeviceResponse> getAllDevices() {
         List<Device> devices = repository.findAll();
@@ -42,10 +46,25 @@ public class DeviceService {
                 .collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteDevice(String id){
         if (!repository.existsById(id)){
             throw new AppException(ErrorCode.DEVICE_NOT_EXISTS);
         }
         repository.deleteById(id);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public void updateDevice(DeviceUpdateRequest request){
+        Device device = repository.findById(request.getId()).orElseThrow(() ->
+                new AppException(ErrorCode.DEVICE_NOT_EXISTS));
+
+        mapper.updateDevice(device, request);
+        repository.save(device);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteAllDevice() {
+       repository.deleteAll();
     }
 }

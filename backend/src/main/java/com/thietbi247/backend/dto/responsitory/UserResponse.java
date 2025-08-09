@@ -16,6 +16,5 @@ public class UserResponse {
     String phone;
     String address;
     Integer room;
-    @ElementCollection
-    Set<String> roles;
+    Set<RoleResponse> roles;
 }

@@ -7,6 +7,7 @@ import com.thietbi247.backend.dto.responsitory.ApiResponse;
 import com.thietbi247.backend.dto.responsitory.UserResponse;
 import com.thietbi247.backend.service.UserService;
 import com.thietbi247.backend.util.ApiResponseUtil;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,8 +25,9 @@ import java.util.List;
 public class UserController {
     UserService userService;
 
+
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody UserCreateRequest request){
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest request){
         UserResponse data = userService.createUser(request);
         return ApiResponseUtil.success(data, SuccessCode.EMPLOYEE_CREATED);
     }
@@ -49,7 +51,7 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<UserResponse> updateEmployee(@RequestBody UserCreateRequest request){
+    public ResponseEntity<UserResponse> updateEmployee(@Valid @RequestBody UserCreateRequest request){
         UserResponse data = userService.updateUser(request);
         return ApiResponseUtil.success(data, SuccessCode.EMPLOYEE_UPDATED);
     }
@@ -57,7 +59,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllEmployee() {
         List<UserResponse>  data = userService.getAllUser();
-        return ApiResponseUtil.success(data, SuccessCode.GET_ALL_EMPLOYEES);
+        return ApiResponseUtil.success(data, SuccessCode.EMPLOYEES_LISTED);
     }
 
     @GetMapping("/myinfo")

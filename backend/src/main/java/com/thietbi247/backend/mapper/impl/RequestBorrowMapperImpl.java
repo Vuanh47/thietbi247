@@ -5,56 +5,49 @@ import com.thietbi247.backend.dto.request.DeviceCreatRequest;
 import com.thietbi247.backend.dto.request.RequestBorowRequest;
 import com.thietbi247.backend.dto.responsitory.RequestBorrowResponse;
 import com.thietbi247.backend.entity.Device;
-import com.thietbi247.backend.entity.User;
 import com.thietbi247.backend.entity.RequestBorrow;
+import com.thietbi247.backend.entity.User;
 import com.thietbi247.backend.exception.AppException;
+import com.thietbi247.backend.mapper.DeviceMapper;
 import com.thietbi247.backend.mapper.RequestBorrowMapper;
+import com.thietbi247.backend.mapper.UserMapper;
 import com.thietbi247.backend.repository.DeviceRepository;
 import com.thietbi247.backend.repository.UserRepository;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RequestBorrowMapperImpl implements RequestBorrowMapper {
-
-    private final DeviceRepository deviceRepository;
-    private final UserRepository userRepository;
+    UserMapper userMapper;
+    DeviceMapper deviceMapper;
 
     @Override
     public RequestBorrow toRequestBorrow(RequestBorowRequest request) {
-        if (request == null) {
-            return null;
-        }
-        log.info(request.toString());
-        Device device = null;
-        User user = null;
-
-        if (request.getDevice_id() != null) {
-            device = deviceRepository.findById(request.getDevice_id())
-                    .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTS));
-        }
-
-        if (request.getEmployee_id() != null) {
-            user = userRepository.findById(request.getEmployee_id())
-                    .orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_EXISTS));
-        }
 
         return RequestBorrow.builder()
                 .id(request.getId())
-                .borrowDate(request.getBorrowDate())
                 .borrowReason(request.getBorrowReason())
                 .dueDate(request.getDueDate())
-                .device(device)
-                .user(user)
                 .build();
     }
 
     @Override
-    public void updateDevice(Device employee, DeviceCreatRequest request) {
-
+    public void updateDevice(Device device, DeviceCreatRequest request) {
+        device.setProductName(request.getProductName());
+        device.setQuantity(request.getQuantity());
+        device.setStatus(request.getStatus());
+        device.setImage(request.getImage());
+        device.setDescription(request.getDescription());
     }
 
     @Override
@@ -64,9 +57,14 @@ public class RequestBorrowMapperImpl implements RequestBorrowMapper {
                 .borrowDate(requestBorrow.getBorrowDate())
                 .borrowReason(requestBorrow.getBorrowReason())
                 .dueDate(requestBorrow.getDueDate())
-                .device_id(requestBorrow.getDevice() != null ? requestBorrow.getDevice().getId() : null)
-                .employee_id(requestBorrow.getUser() != null ? requestBorrow.getUser().getId() : null)
+                .user(userMapper.toUserSimpleResponse(requestBorrow.getUser()))
+                .device(
+                        requestBorrow.getDevices() != null
+                        ? requestBorrow.getDevices().stream()
+                        .map(deviceMapper::toDeviceResponse)
+                        .collect(Collectors.toSet())
+                        : Collections.emptySet()
+                )
                 .build();
     }
 }
-

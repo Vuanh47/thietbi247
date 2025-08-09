@@ -1,6 +1,6 @@
 package com.thietbi247.backend.constant;
 
-public enum Role {
+public enum RoleType  {
     ADMIN,
     EMPLOYEE
 }

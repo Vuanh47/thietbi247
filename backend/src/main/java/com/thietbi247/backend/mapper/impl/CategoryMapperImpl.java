@@ -4,6 +4,7 @@ import com.thietbi247.backend.dto.request.CategoryCreatResquest;
 import com.thietbi247.backend.dto.responsitory.CategoryReponse;
 import com.thietbi247.backend.entity.Category;
 import com.thietbi247.backend.mapper.CategoryMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -12,4 +12,5 @@ public interface UserMapper {
     void updateUser(User user, UserCreateRequest request);
     UserResponse toUserResponse(User user);
 
+    UserResponse toUserSimpleResponse(User user);
 }

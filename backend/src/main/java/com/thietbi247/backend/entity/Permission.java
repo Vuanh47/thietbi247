@@ -5,11 +5,12 @@ import lombok.experimental.FieldDefaults;
 import jakarta.persistence.Id;
 
 @Entity
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@ToString(onlyExplicitlyIncluded = true)
 public class Permission {
     @Id
     String name;

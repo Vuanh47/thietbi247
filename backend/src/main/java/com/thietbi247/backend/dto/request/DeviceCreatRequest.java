@@ -14,14 +14,11 @@ import java.util.Date;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DeviceCreatRequest {
-    String id;
     String productName;
     int quantity;
     String status;
     String image;
     String description;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss dd/MM/yyyy")
-    LocalDateTime datePurchase;
 
     String categoryId;
 }

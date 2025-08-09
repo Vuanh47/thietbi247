@@ -6,6 +6,8 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -19,7 +21,7 @@ public class RequestBorrowResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss dd/MM/yyyy")
     LocalDateTime dueDate;
-    String employee_id;
-    String device_id;
 
+    UserResponse user;
+    Set<DeviceResponse> device;
 }

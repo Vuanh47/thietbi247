@@ -4,27 +4,34 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
 @Entity
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@ToString(onlyExplicitlyIncluded = true)
 public class History {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
-    Date borrowDate;
-    Date returnDate;
+    LocalDateTime borrowDate;
+    LocalDateTime returnDate;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     User user;
 
-    @OneToMany(mappedBy = "history", cascade = CascadeType.ALL)
-    @JsonIgnore
-    List<Device> deviceList;
+    @ManyToOne
+    @JoinColumn(name = "device_id")
+    Device device;
+
+
+    @OneToOne
+    @JoinColumn(name = "approval_id")
+    Approval approval;
 }

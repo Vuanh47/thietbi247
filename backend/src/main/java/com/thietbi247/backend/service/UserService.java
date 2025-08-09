@@ -1,12 +1,13 @@
 package com.thietbi247.backend.service;
 
 import com.thietbi247.backend.constant.ErrorCode;
-import com.thietbi247.backend.constant.Role;
 import com.thietbi247.backend.dto.request.UserCreateRequest;
 import com.thietbi247.backend.dto.responsitory.UserResponse;
+import com.thietbi247.backend.entity.Role;
 import com.thietbi247.backend.entity.User;
 import com.thietbi247.backend.exception.AppException;
 import com.thietbi247.backend.mapper.UserMapper;
+import com.thietbi247.backend.repository.RoleRepository;
 import com.thietbi247.backend.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -35,52 +36,65 @@ import java.util.stream.Collectors;
 public class UserService {
     UserMapper mapper;
     UserRepository repository;
+    RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
-    public UserResponse createUser(UserCreateRequest request) {
 
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse createUser(UserCreateRequest request) {
         if (repository.existsByEmail(request.getEmail())) {
-           throw new AppException(ErrorCode.EMPLOYEE_EXISTS);
+            throw new AppException(ErrorCode.EMPLOYEE_EXISTS);
         }
 
         if (!repository.findByUserName(request.getUserName()).isEmpty()) {
             throw new AppException(ErrorCode.EMPLOYEE_EXISTS);
         }
+
         User user = mapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        Set<String> roles = new HashSet<>();
-        roles.add(Role.EMPLOYEE.name());
-        user.setRoles(roles);
-        log.info("User created: "  + user);
+        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+            Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoles()));
+            if (roles.size() != request.getRoles().size()) {
+                throw new AppException(ErrorCode.ROLE_NOT_EXISTS);
+            }
+            user.setRoles(roles);
+        } else {
+            throw new AppException(ErrorCode.ROLES_REQUIRED);
+        }
+
         repository.save(user);
         return mapper.toUserResponse(user);
     }
 
-    public void deleteUser(String id){
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteUser(String id) {
         User user = repository.findById(id).orElseThrow(()
-            ->new AppException(ErrorCode.EMPLOYEE_NOT_EXISTS));
+                -> new AppException(ErrorCode.EMPLOYEE_NOT_EXISTS));
         repository.delete(user);
     }
 
     @PostAuthorize("hasRole('ADMIN')")
-    public UserResponse getUser(String id){
-       log.info("In method getUser");
+    public UserResponse getUser(String id) {
+        log.info("In method getUser");
         User user = repository.findById(id)
-                .orElseThrow(()-> new AppException(ErrorCode.EMPLOYEE_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_EXISTS));
         return mapper.toUserResponse(user);
     }
 
-    public UserResponse getMyInfo(){
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public UserResponse getMyInfo() {
         var info = SecurityContextHolder.getContext().getAuthentication();
         User user = repository.findByUserName(info.getName()).orElseThrow(() ->
                 new AppException(ErrorCode.EMPLOYEE_NOT_EXISTS));
         return mapper.toUserResponse(user);
     }
 
-    public void deleteAllUser(){
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteAllUser() {
         repository.deleteAll();
     }
 
-    public UserResponse updateUser(UserCreateRequest request){
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse updateUser(UserCreateRequest request) {
         if (!repository.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMPLOYEE_NOT_EXISTS);
         }
@@ -89,14 +103,16 @@ public class UserService {
         return mapper.toUserResponse(user);
     }
 
+    //    @PreAuthorize("hasAuthority('DEVICE_VIEW')")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<UserResponse> getAllUser(){
+    public List<UserResponse> getAllUser() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         log.info("Username: " + auth.getName());
-        auth.getAuthorities().forEach(user -> {
-            log.info(user.getAuthority());
+        auth.getAuthorities().forEach(role -> {
+            log.info(role.getAuthority());
         });
         List<User> users = repository.findAll();
+
         return users.stream().map(mapper::toUserResponse).collect(Collectors.toList());
     }
 }

@@ -5,6 +5,8 @@ import com.thietbi247.backend.constant.ErrorCode;
 import com.thietbi247.backend.constant.SuccessCode;
 import com.thietbi247.backend.dto.request.AuthenticationRequest;
 import com.thietbi247.backend.dto.request.IntrospectRequest;
+import com.thietbi247.backend.dto.request.LogoutRequest;
+import com.thietbi247.backend.dto.responsitory.ApiResponse;
 import com.thietbi247.backend.dto.responsitory.AuthenticationResponse;
 import com.thietbi247.backend.dto.responsitory.IntrospectResponse;
 import com.thietbi247.backend.service.AuthenticationService;
@@ -36,5 +38,11 @@ public class AuthenticationController {
     public ResponseEntity<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
         var data = service.introspect(request);
         return ApiResponseUtil.success(data, SuccessCode.LOGIN_SUCCESSFUL);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
+        service.logout(request);
+        return ApiResponseUtil.success(SuccessCode.LOGOUT_SUCCESSFUL);
     }
 }

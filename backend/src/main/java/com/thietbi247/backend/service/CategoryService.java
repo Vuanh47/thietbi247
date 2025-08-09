@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,8 @@ import java.time.LocalDateTime;
 public class CategoryService {
     CategoryRepository repository;
     CategoryMapper mapper;
+
+
     public CategoryReponse createCategory(CategoryCreatResquest resquest) {
         Category category = mapper.toCategory(resquest);
         category.setUpdated_at(LocalDateTime.now());
@@ -34,11 +37,13 @@ public class CategoryService {
         return mapper.toCategoryReponse(category);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteCategory(String id) {
         Category category = repository.findById(id).orElseThrow(()
                 -> new AppException(ErrorCode.CATEGORY_NOT_EXISTS));
         repository.delete(category);
     }
+
 
     public List<CategoryReponse> getAllCategories() {
         List<Category> categories = repository.findAll();
@@ -47,11 +52,12 @@ public class CategoryService {
                 .toList();
     }
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteAllCategory(){
         repository.deleteAll();
     }
 
+    @PreAuthorize("hasRole('EMPLOYEE')")
     public CategoryReponse getCategory(String id) {
         Category category = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTS));
         return mapper.toCategoryReponse(category);

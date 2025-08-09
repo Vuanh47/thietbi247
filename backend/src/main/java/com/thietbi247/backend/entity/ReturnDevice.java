@@ -4,30 +4,33 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
 @Entity
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@ToString(onlyExplicitlyIncluded = true)
 public class ReturnDevice {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
-    Date returnDate;
+
+    LocalDateTime returnDate;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     User user;
 
-    @OneToMany(mappedBy = "returnDevice", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @OneToMany(mappedBy = "returnDevice", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     List<Device> deviceList;
 
     @OneToOne(mappedBy = "returnDevice", cascade = CascadeType.ALL)
     Approval approval;
-
 }
+

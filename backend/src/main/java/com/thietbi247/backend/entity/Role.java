@@ -1,24 +1,31 @@
 package com.thietbi247.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Set;
 
 @Entity
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@ToString(onlyExplicitlyIncluded = true)
 public class Role {
     @Id
+    @EqualsAndHashCode.Include
     String name;
     String description;
 
-    @ManyToMany
+    // Chỉ cascade khi thêm mới (PERSIST) hoặc cập nhật (MERGE)
+    // Không cascade khi xóa để tránh xóa nhầm dữ liệu dùng chung
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "role_permissions",
+            joinColumns = @JoinColumn(name = "role_name", referencedColumnName = "name"),
+            inverseJoinColumns = @JoinColumn(name = "permission_name", referencedColumnName = "name")
+    )
     Set<Permission> permissions;
 }

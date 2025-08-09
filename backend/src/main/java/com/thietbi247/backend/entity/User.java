@@ -3,15 +3,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
 import java.util.List;
 import java.util.Set;
+
 @Entity
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@ToString(onlyExplicitlyIncluded = true)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -22,9 +23,6 @@ public class User {
     String phone;
     String address;
     Integer room;
-    @ElementCollection
-    Set<String> roles;
-
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -49,4 +47,12 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
     List<Approval>  approvalList;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_roles", // tên bảng trung gian
+            joinColumns = @JoinColumn(name = "user_id"), // FK tới User
+            inverseJoinColumns = @JoinColumn(name = "roles_name", referencedColumnName = "name") // FK tới Role.name
+    )
+    Set<Role> roles;
 }

@@ -3,6 +3,7 @@ package com.thietbi247.backend.controller;
 import com.thietbi247.backend.constant.ErrorCode;
 import com.thietbi247.backend.constant.SuccessCode;
 import com.thietbi247.backend.dto.request.DeviceCreatRequest;
+import com.thietbi247.backend.dto.request.DeviceUpdateRequest;
 import com.thietbi247.backend.dto.responsitory.ApiResponse;
 import com.thietbi247.backend.dto.responsitory.DeviceResponse;
 import com.thietbi247.backend.service.DeviceService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -28,10 +30,8 @@ public class DeviceController {
 
     @PostMapping
     public ResponseEntity<DeviceResponse> createDevice(@RequestBody DeviceCreatRequest request) {
-        log.info(request.toString());
         DeviceResponse data = deviceService.createDevice(request);
-        log.info(data.toString());
-        return ApiResponseUtil.success(data, SuccessCode.DEVICE_CREATED);
+        return  ApiResponseUtil.success(data, SuccessCode.DEVICE_CREATED);
     }
 
     @GetMapping
@@ -44,6 +44,18 @@ public class DeviceController {
     public ResponseEntity<ApiResponse<Void>> deleteDevice(@PathVariable String id) {
         deviceService.deleteDevice(id);
         return ApiResponseUtil.success(SuccessCode.DEVICE_DELETED);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> deleteAllDevice() {
+        deviceService.deleteAllDevice();
+        return ApiResponseUtil.success(SuccessCode.DEVICE_DELETED);
+    }
+
+    @PutMapping
+    public ResponseEntity<ApiResponse<Void>> updateDevice(@RequestBody DeviceUpdateRequest request) {
+        deviceService.updateDevice(request);
+        return  ApiResponseUtil.success(SuccessCode.DEVICE_UPDATED);
     }
 
     @PostMapping("/upload-image")

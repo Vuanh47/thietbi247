@@ -1,4 +1,5 @@
 package com.thietbi247.backend.entity;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -6,14 +7,17 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
-
+import java.util.List;
+import java.util.Set;
 
 @Entity
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Device {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,26 +28,27 @@ public class Device {
     String image;
     String description;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss dd/MM/yyyy")
-    LocalDateTime datePurchase;
-
-    @ManyToOne
-    @JoinColumn(name = "history_id")
-    History history;
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL)
+    @JsonIgnore
+    List<History>  historyList;
 
     @ManyToOne
     @JoinColumn(name = "return_device_id")
     ReturnDevice returnDevice;
 
-    @OneToOne(mappedBy = "device", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "devices")
     @JsonIgnore
-    private RequestBorrow requestBorrow;
+    Set<RequestBorrow> requestBorrows;
 
-    @ManyToOne
-    @JoinColumn(name = "error_report_id")
-    ErrorReport errorReport;
+
+    @ManyToMany(mappedBy = "devices")
+    @JsonIgnore
+    Set<ErrorReport> errorReports;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
     Category category;
+
+    @OneToOne(mappedBy = "device", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Approval approval;
 }

@@ -4,13 +4,15 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@ToString(onlyExplicitlyIncluded = true)
 public class RequestBorrow {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,9 +25,13 @@ public class RequestBorrow {
     @JoinColumn(name = "user_id")
     User user;
 
-    @OneToOne
-    @JoinColumn(name = "device_id", referencedColumnName = "id")
-    private Device device;
+    @ManyToMany
+    @JoinTable(
+            name = "request_borrow_device",
+            joinColumns = @JoinColumn(name = "request_borrow_id"),
+            inverseJoinColumns = @JoinColumn(name = "device_id")
+    )
+    private Set<Device> devices ;
 
 
 }
